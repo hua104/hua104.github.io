@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>■十一｜圣诞快乐！</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0f0505;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #scene3d {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            outline: none;
+            z-index: 1;
+        }
+        
+        /* 标题向下移动 - 关键修改：top从20px改为60px */
+        .title-overlay {
+            position: fixed;
+            top: 60px;          /* 标题向下移动，避免遮挡内容 */
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 100;
+            pointer-events: none;
+            padding: 0 20px;
+        }
+        
+        .main-title {
+            font-size: 3.2rem;
+            font-family: 'Mountains of Christmas', 'Ma Shan Zheng', cursive;
+            letter-spacing: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        .square-char {
+            display: inline-block;
+            font-size: 3.6rem;
+            vertical-align: middle;
+            margin-right: 8px;
+            line-height: 1;
+            font-family: 'Mountains of Christmas', 'Ma Shan Zheng', cursive;
+        }
+        
+        /* 左右控件面板容器 */
+        .controls-container {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 20px;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        /* 左侧风格选择面板 */
+        .style-panel {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 12px;
+            padding: 20px;
+            width: 280px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+            pointer-events: auto;
+        }
+        
+        .style-panel h3 {
+            color: #FFD700;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        
+        .style-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        /* 右侧速度控制面板 */
+        .speed-panel {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 12px;
+            padding: 20px;
+            width: 320px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+            pointer-events: auto;
+        }
+        
+        .speed-panel h3 {
+            color: #FFD700;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        
+        .style-btn {
+            padding: 10px 8px;
+            border: none;
+            border-radius: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.12);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            pointer-events: auto;
+            font-size: 0.9rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .style-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .style-btn.active {
+            transform: translateY(-2px);
+            box-shadow: 0 0 12px currentColor;
+        }
+        
+        .speed-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .slider-label {
+            margin-bottom: 8px;
+            color: #FFD700;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .slider-label span {
+            color: #aaa;
+            font-weight: normal;
+        }
+        
+        /* 横向滑块（动画控制） */
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #333;
+            outline: none;
+            opacity: 0.8;
+            transition: opacity .2s;
+            pointer-events: auto;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #FFD700;
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #FFD700;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .slider:hover {
+            opacity: 1;
+        }
+        
+        /* 音频控制样式 - 核心修改：确保播放按钮、音量滑块、文字中心点严格垂直对齐 */
+        .audio-controls {
+            position: fixed;
+            top: 20px;          
+            right: 20px;        
+            z-index: 101;
+            display: flex;
+            flex-direction: column; 
+            align-items: center;    /* 强制所有子元素水平居中 */
+            justify-content: flex-start;
+            gap: 20px;              /* 增加间距，优化视觉 */
+            pointer-events: auto;
+            width: 60px;            /* 固定宽度，确保对齐基准 */
+            /* 调试用：可以开启查看对齐线
+            border: 1px solid red;
+            */
+        }
+        
+        .audio-play-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #FFD700;
+            color: #FFD700;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+            /* 关键：固定位置，确保中心点在容器中心 */
+            margin: 0 auto;
+            position: relative;
+            left: 0;
+            top: 0;
+        }
+        
+        .audio-play-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px #FFD700;
+        }
+        
+        /* 音量滑块容器 - 核心修改：严格居中对齐 */
+        .volume-slider-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;            /* 继承父容器宽度，确保对齐 */
+            height: 120px;
+            position: relative;
+            /* 调试用：可以开启查看对齐线
+            border: 1px solid green;
+            */
+        }
+        
+        /* 音量滑块 - 核心修改：修正旋转和中心点对齐 */
+        .volume-slider {
+            width: 120px;
+            height: 8px;
+            border-radius: 4px;
+            background: #333;
+            outline: none;
+            opacity: 0.8;
+            transition: opacity .2s;
+            pointer-events: auto;
+            -webkit-appearance: none;
+            /* 关键修改：旋转中心改为滑块中点 */
+            transform: rotate(-90deg);
+            transform-origin: center center; /* 滑块自身中心点旋转 */
+            position: absolute;
+            left: 50%;               /* 水平居中 */
+            top: 50%;                /* 垂直居中 */
+            /* 精确偏移，确保滑块中心点与容器/播放按钮中心点重合 */
+            margin-left: -60px;      /* 滑块宽度的一半 */
+            margin-top: -4px;        /* 滑块高度的一半 */
+            /* 调试用：可以开启查看滑块对齐
+            border: 1px solid blue;
+            */
+        }
+        
+        /* 统一滑块样式 */
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #FFD700;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #FFD700;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+        }
+        
+        .volume-slider:hover {
+            opacity: 1;
+        }
+        
+        /* 音量文字 - 核心修改：严格居中对齐 */
+        .volume-label {
+            color: #FFD700;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            position: absolute;
+            bottom: -20px;
+            left: 50%;              /* 水平居中 */
+            transform: translateX(-50%); /* 精确偏移 */
+            width: 100%;
+            /* 调试用：可以开启查看文字对齐
+            border: 1px solid yellow;
+            */
+        }
+        
+        .footer {
+            position: fixed;
+            bottom: 3px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: #aaa;
+            font-size: 0.75rem;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        .info-text {
+            position: fixed;
+            top: 130px;         /* 同步调整提示文字位置，跟随标题下移 */
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 11px;
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 100;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* 移动端下拉控制面板 */
+        .mobile-controls-toggle {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            color: #FFD700;
+            text-align: center;
+            padding: 12px;
+            z-index: 101;
+            cursor: pointer;
+            pointer-events: auto;
+            border-top: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 15px 15px 0 0;
+            backdrop-filter: blur(8px);
+        }
+        
+        .mobile-controls-toggle span {
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .mobile-controls-toggle .arrow {
+            font-size: 1.2rem;
+            margin-top: 4px;
+            transition: transform 0.3s ease;
+        }
+        
+        .mobile-controls-toggle .arrow.up {
+            transform: rotate(180deg);
+        }
+        
+        /* 移动端适配 - 同步调整音频控件对齐 */
+        @media (max-width: 1024px) {
+            .title-overlay {
+                top: 40px;  /* 移动端标题适当下移（比PC端少一点） */
+            }
+            
+            .controls-container {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                flex-direction: column;
+                align-items: center;
+                gap: 0;
+                padding: 0;
+                transform: translateY(100%);
+                transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                background: rgba(0, 0, 0, 0.85);
+                backdrop-filter: blur(10px);
+                border-top: 2px solid rgba(255, 215, 0, 0.3);
+                border-radius: 20px 20px 0 0;
+                overflow: hidden;
+                max-height: 80vh;
+                overflow-y: auto;
+                pointer-events: auto;
+            }
+            
+            .controls-container.active {
+                transform: translateY(0);
+            }
+            
+            .style-panel, .speed-panel {
+                width: 100%;
+                max-width: 100%;
+                padding: 20px;
+                border-radius: 0;
+                border: none;
+                box-shadow: none;
+                background: transparent;
+            }
+            
+            .mobile-controls-toggle {
+                display: block;
+            }
+            
+            .style-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .speed-controls {
+                gap: 20px;
+            }
+            
+            .slider-container {
+                margin-bottom: 10px;
+            }
+
+            /* 移动端音频控件 - 保持垂直对齐 */
+            .audio-controls {
+                width: 55px;  /* 同步缩小容器宽度 */
+                gap: 15px;
+            }
+            .audio-play-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 16px;
+            }
+            .volume-slider-container {
+                width: 100%;
+                height: 100px;
+            }
+            .volume-slider {
+                width: 100px;
+                margin-left: -50px;  /* 对应滑块宽度的一半 */
+                margin-top: -4px;    /* 滑块高度的一半 */
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 2.4rem;
+            }
+            
+            .square-char {
+                font-size: 2.8rem;
+            }
+            
+            .style-btn {
+                padding: 8px 5px;
+                font-size: 0.85rem;
+                height: 40px;
+            }
+            
+            .controls-container {
+                max-height: 70vh;
+            }
+            
+            .info-text {
+                top: 100px;  /* 移动端提示文字同步下移 */
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .title-overlay {
+                top: 30px;  /* 小屏移动端标题进一步微调 */
+            }
+            
+            .main-title {
+                font-size: 2rem;
+            }
+            
+            .square-char {
+                font-size: 2.4rem;
+            }
+            
+            .style-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+            
+            .style-btn {
+                padding: 6px 4px;
+                font-size: 0.8rem;
+                height: 38px;
+            }
+            
+            .controls-container {
+                max-height: 65vh;
+            }
+            
+            .style-panel, .speed-panel {
+                padding: 15px;
+            }
+            
+            /* 小屏移动端音频控件 - 保持垂直对齐 */
+            .audio-controls {
+                width: 50px;
+                gap: 10px;
+            }
+            .audio-play-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
+            }
+            .volume-slider-container {
+                width: 100%;
+                height: 80px;
+            }
+            .volume-slider {
+                width: 80px;
+                margin-left: -40px;  /* 对应滑块宽度的一半 */
+                margin-top: -4px;    /* 滑块高度的一半 */
+            }
+            
+            .info-text {
+                top: 90px;
+            }
+        }
+        
+        /* 隐藏原始底部面板和原生音频控件 */
+        .controls-panel {
+            display: none;
+        }
+        
+        #christmasAudio {
+            display: none;
+        }
+    </style>
+    <!-- 添加圣诞艺术字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+    <!-- Three.js 库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- OrbitControls 用于鼠标控制 -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+</head>
+<body>
+    <canvas id="scene3d"></canvas>
+    
+    <div class="title-overlay">
+        <div class="main-title" id="mainTitle">
+            <span class="square-char" id="squareChar">■</span>十一｜圣诞快乐！
+        </div>
+    </div>
+    
+    <div class="info-text" id="infoText">鼠标拖拽旋转视角 | 滚轮缩放</div>
+    
+    <!-- 移动端下拉切换按钮 -->
+    <div class="mobile-controls-toggle" id="mobileToggle">
+        <span>控制面板</span>
+        <div class="arrow" id="toggleArrow">▼</div>
+    </div>
+    
+    <!-- 新的左右控件布局 -->
+    <div class="controls-container" id="controlsContainer">
+        <!-- 左侧风格选择面板 -->
+        <div class="style-panel">
+            <h3>🎄 选择圣诞树风格</h3>
+            <div class="style-grid">
+                <button class="style-btn active" data-style="1">经典绿色</button>
+                <button class="style-btn" data-style="2">冰雪蓝</button>
+                <button class="style-btn" data-style="3">暗黑绿</button>
+                <button class="style-btn" data-style="4">多彩圣诞</button>
+                <button class="style-btn" data-style="5">黑白极简</button>
+                <button class="style-btn" data-style="6">粉色浪漫</button>
+            </div>
+        </div>
+        
+        <!-- 右侧速度控制面板 -->
+        <div class="speed-panel">
+            <h3>⚙️ 动画速度控制</h3>
+            <div class="speed-controls">
+                <div class="slider-container">
+                    <div class="slider-label">
+                        树旋转速度
+                        <span id="rotationSpeedValue">0.006</span>
+                    </div>
+                    <input type="range" min="1" max="100" value="45" class="slider" id="rotationSpeedSlider">
+                </div>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        雪花下落速度
+                        <span id="snowSpeedValue">0.7</span>
+                    </div>
+                    <input type="range" min="1" max="100" value="35" class="slider" id="snowSpeedSlider">
+                </div>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        星星闪烁速度
+                        <span id="starSpeedValue">0.6</span>
+                    </div>
+                    <input type="range" min="1" max="100" value="60" class="slider" id="starSpeedSlider">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 隐藏原始底部面板 -->
+    <div class="controls-panel">
+        <div class="style-section">
+            <h3>选择圣诞树风格</h3>
+            <div class="style-grid">
+                <button class="style-btn active" data-style="1">经典绿色</button>
+                <button class="style-btn" data-style="2">冰雪蓝</button>
+                <button class="style-btn" data-style="3">暗黑绿</button>
+                <button class="style-btn" data-style="4">多彩圣诞</button>
+                <button class="style-btn" data-style="5">黑白极简</button>
+                <button class="style-btn" data-style="6">粉色浪漫</button>
+            </div>
+        </div>
+        
+        <div class="speed-controls">
+            <div class="slider-container">
+                <div class="slider-label">树旋转速度</div>
+                <input type="range" min="1" max="100" value="45" class="slider" id="rotationSpeedSliderOld">
+                <div class="value-display">速度: <span id="rotationSpeedValueOld">0.006</span></div>
+            </div>
+            
+            <div class="slider-container">
+                <div class="slider-label">雪花下落速度</div>
+                <input type="range" min="1" max="100" value="35" class="slider" id="snowSpeedSliderOld">
+                <div class="value-display">速度: <span id="snowSpeedValueOld">0.7</span></div>
+            </div>
+            
+            <div class="slider-container">
+                <div class="slider-label">星星闪烁速度</div>
+                <input type="range" min="1" max="100" value="60" class="slider" id="starSpeedSliderOld">
+                <div class="value-display">速度: <span id="starSpeedValueOld">0.6</span></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 音频控件 -->
+    <audio id="christmasAudio" loop>
+        <source src="file:///D:/桌面/圣诞节/Mariah%20Carey%20-%20All%20I%20Want%20For%20Christmas%20Is%20You.mp3" type="audio/mpeg">
+        您的浏览器不支持音频播放
+    </audio>
+    
+    <!-- 自定义音频控制（严格垂直对齐） -->
+    <div class="audio-controls">
+        <button class="audio-play-btn" id="audioPlayBtn">▶️</button>
+        <div class="volume-slider-container">
+            <div class="volume-label">音量</div>
+            <input type="range" min="0" max="100" value="80" class="volume-slider" id="volumeSlider">
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p id="footerText">■十一｜圣诞快乐！</p>
+    </div>
+
+    <script>
+        // ========== 音频控制逻辑 - 统一PC/移动端（移除设备判断） ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            const audio = document.getElementById('christmasAudio');
+            const playBtn = document.getElementById('audioPlayBtn');
+            const volumeSlider = document.getElementById('volumeSlider');
+            
+            // 初始化音量（统一逻辑：滑块值/100）
+            audio.volume = volumeSlider.value / 100;
+            
+            // 播放/暂停切换
+            playBtn.addEventListener('click', function() {
+                if (audio.paused) {
+                    audio.play().then(() => {
+                        playBtn.textContent = '⏸️';
+                        console.log('圣诞背景音乐开始播放 🎵');
+                    }).catch(err => {
+                        console.log('播放失败:', err);
+                    });
+                } else {
+                    audio.pause();
+                    playBtn.textContent = '▶️';
+                    console.log('圣诞背景音乐已暂停 ⏸️');
+                }
+            });
+            
+            // 音量控制逻辑 - 统一（向上拖动/向右拖动 = 音量增大）
+            volumeSlider.addEventListener('input', function() {
+                const volumeValue = this.value / 100;
+                audio.volume = volumeValue;
+                console.log('当前音量:', volumeValue.toFixed(2));
+            });
+            
+            // 解决浏览器自动播放策略限制
+            function initAudioPlay() {
+                audio.play().then(() => {
+                    playBtn.textContent = '⏸️';
+                }).catch(err => {
+                    console.log('自动播放被阻止，点击播放按钮开始播放:', err);
+                });
+                document.body.removeEventListener('click', initAudioPlay);
+                document.body.removeEventListener('touchstart', initAudioPlay);
+            }
+            
+            // 尝试自动播放
+            audio.play().catch(err => {
+                document.body.addEventListener('click', initAudioPlay);
+                document.body.addEventListener('touchstart', initAudioPlay);
+            });
+        });
+
+        // 初始化Three.js场景
+        const scene = new THREE.Scene();
+        const canvas = document.getElementById('scene3d');
+        const renderer = new THREE.WebGLRenderer({ 
+            canvas, 
+            antialias: true,
+            alpha: true,
+            powerPreference: "high-performance"
+        });
+        
+        // 设置渲染器
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        
+        // 相机
+        const camera = new THREE.PerspectiveCamera(
+            60, 
+            window.innerWidth / window.innerHeight, 
+            0.1, 
+            1000
+        );
+        camera.position.set(0, 0.5, 3);
+        
+        // 轨道控制器
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 1.5;
+        controls.maxDistance = 5;
+        controls.maxPolarAngle = Math.PI / 2;
+        
+        // 灯光
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 5, 5);
+        directionalLight.castShadow = true;
+        scene.add(directionalLight);
+        
+        // 6种风格配置
+        const styles = {
+            "1": { // 经典绿色
+                bg_col: "#0f0505", 
+                tree_cols: ["#0B3D0B", "#144514", "#006400"],
+                trunk_col: "#3e2723", 
+                decor_cols: ["#FFD700", "#CCA43B", "#8B0000"],
+                star_col: "#FFD700", 
+                text_col: "#FFD700", 
+                snow_col: "white",
+                ribbon: true, 
+                ribbon_col: "#D4AF37", 
+                ribbon_width: 1.5
+            },
+            "2": { // 冰雪蓝
+                bg_col: "#F0F2F5", 
+                tree_cols: ["#2F4F4F", "#5F9EA0", "#708090"],
+                trunk_col: "#696969", 
+                decor_cols: ["#B0C4DE", "#FFFAF0", "#E0FFFF"],
+                star_col: "#B0C4DE", 
+                text_col: "#708090", 
+                snow_col: "#87CEFA",
+                ribbon: true, 
+                ribbon_col: "#B0C0C0", 
+                ribbon_width: 1.5
+            },
+            "3": { // 暗黑绿
+                bg_col: "#1a1a1a", 
+                tree_cols: ["#556B2F", "#6B8E23", "#808000"],
+                trunk_col: "#5D4037", 
+                decor_cols: ["#CD853F", "#FFCC00"],
+                star_col: "#FFCC00", 
+                text_col: "#DEB887", 
+                snow_col: "white",
+                ribbon: false, 
+                ribbon_col: null, 
+                ribbon_width: 0
+            },
+            "4": { // 多彩圣诞
+                bg_col: "#101010", 
+                tree_cols: ["#006400", "#228B22"],
+                trunk_col: "#4E342E", 
+                decor_cols: ["#FF0000", "#00FF00", "#0000FF", "#FFFF00"],
+                star_col: "#FFD700", 
+                text_col: "#FF6347", 
+                snow_col: "white",
+                ribbon: true, 
+                ribbon_col: "#C0C0C0", 
+                ribbon_width: 1.0
+            },
+            "5": { // 黑白极简
+                bg_col: "#000000", 
+                tree_cols: ["#111111", "#050505"],
+                trunk_col: "#222222", 
+                decor_cols: ["#FFFFFF", "#FFFFE0"],
+                star_col: "#FFFFFF", 
+                text_col: "#FFFFFF", 
+                snow_col: "#4d4d4d",
+                ribbon: true, 
+                ribbon_col: "#FFFFFF", 
+                ribbon_width: 0.8
+            },
+            "6": { // 粉色浪漫
+                bg_col: "#1F0F12",
+                tree_cols: ["#D87093", "#FF69B4", "#FFB6C1"],
+                trunk_col: "#4A3728",
+                decor_cols: ["#FFFFFF", "#FFD700", "#FF1493"],
+                star_col: "#FFD700",
+                text_col: "#FFC0CB",
+                snow_col: "#FFF0F5",
+                ribbon: true,
+                ribbon_col: "#F8F8FF",
+                ribbon_width: 0.8,
+                ribbon_burr: 0.04
+            }
+        };
+        
+        // 全局变量
+        let currentStyle = "1";
+        let treeGroup = new THREE.Group();
+        let decorationsGroup = new THREE.Group();
+        let ribbonGroup = new THREE.Group();
+        let snowGroup = new THREE.Group();
+        let star = null;
+        let starLight = null;
+        
+        // 速度控制变量
+        let rotationSpeed = 0.006;
+        let snowSpeed = 0.7;
+        let starSpeed = 0.6;
+        
+        let snowParticles = [];
+        let frameId = 0;
+        const n_frames = 90;
+        
+        // 工具函数
+        function hexToRgb(hex) {
+            if (typeof hex !== 'string') return { r: 1, g: 1, b: 1 };
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16) / 255,
+                g: parseInt(result[2], 16) / 255,
+                b: parseInt(result[3], 16) / 255
+            } : { r: 1, g: 1, b: 1 };
+        }
+        
+        // 生成随机数
+        function random(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+        
+        // 生成圣诞树数据
+        function generateTreeData(cfg) {
+            const data = {
+                trunk: [],
+                tree: [],
+                decor: [],
+                ribbon: []
+            };
+            
+            // 生成树干数据
+            for (let i = 0; i < 1000; i++) {
+                const h_trunk = random(-0.7, -0.45);
+                const r_trunk = 0.12;
+                const theta_trunk = random(0, Math.PI * 2);
+                
+                data.trunk.push({
+                    x: r_trunk * Math.cos(theta_trunk),
+                    y: h_trunk,
+                    z: r_trunk * Math.sin(theta_trunk),
+                    col: cfg.trunk_col,
+                    size: 1.2,
+                    type: "trunk",
+                    alpha: 1
+                });
+            }
+            
+            // 生成树叶数据
+            for (let i = 0; i < 8000; i++) {
+                const h = random(0, 1);
+                const base_r = (1 - h);
+                const layer_cycle = (h * 7) % 1;
+                const r = base_r * 0.65 * (0.4 + 0.6 * Math.pow((1 - layer_cycle), 0.7));
+                const theta = random(0, Math.PI * 2);
+                
+                data.tree.push({
+                    x: r * Math.cos(theta),
+                    y: h - 0.5,
+                    z: r * Math.sin(theta),
+                    col: cfg.tree_cols[Math.floor(random(0, cfg.tree_cols.length))],
+                    size: random(0.6, 1.8),
+                    type: "tree",
+                    alpha: 0.95
+                });
+            }
+            
+            // 生成装饰物数据
+            for (let i = 0; i < 600; i++) {
+                const h_dec = random(0, 0.95);
+                const base_r_dec = (1 - h_dec);
+                const layer_cycle_dec = (h_dec * 7) % 1;
+                const r_dec = base_r_dec * 0.68 * (0.4 + 0.6 * Math.pow((1 - layer_cycle_dec), 0.7));
+                const theta_dec = random(0, Math.PI * 2);
+                
+                data.decor.push({
+                    x: r_dec * Math.cos(theta_dec),
+                    y: h_dec - 0.5,
+                    z: r_dec * Math.sin(theta_dec),
+                    col: cfg.decor_cols[Math.floor(random(0, cfg.decor_cols.length))],
+                    size: random(2, 4),
+                    type: "decor",
+                    alpha: 1
+                });
+            }
+            
+            // 生成丝带数据
+            if (cfg.ribbon) {
+                for (let i = 0; i <= 6000; i++) {
+                    const h_rib = i / 6000 * 0.95;
+                    const base_r_rib = (1 - h_rib) * 0.65 * 1.05;
+                    const theta_rib = 10 * Math.PI * h_rib;
+                    
+                    data.ribbon.push({
+                        x: base_r_rib * Math.cos(theta_rib),
+                        y: h_rib - 0.5,
+                        z: base_r_rib * Math.sin(theta_rib),
+                        col: cfg.ribbon_col,
+                        size: cfg.ribbon_width,
+                        type: "ribbon",
+                        alpha: 1
+                    });
+                }
+            }
+            
+            return data;
+        }
+        
+        // 生成雪花数据
+        function generateSnow(cfg) {
+            const snowData = [];
+            for (let i = 0; i < 250; i++) {
+                const speed = random(0.00025, 0.00075) * snowSpeed * 10;
+                snowData.push({
+                    x: random(-1, 1),
+                    y: random(-0.8, 1.2),
+                    z: random(-1, 1),
+                    col: cfg.snow_col,
+                    size: random(0.5, 2),
+                    type: "snow",
+                    alpha: random(0.5, 0.9),
+                    speed: speed
+                });
+            }
+            return snowData;
+        }
+        
+        // 生成标准五角星多边形 - 修复版
+        function getStarPolygon(x_center, y_center, radius) {
+            const starShape = new THREE.Shape();
+            
+            // 标准五角星的生成参数
+            const outerRadius = radius;      // 外接圆半径
+            const innerRadius = radius * 0.4; // 内接圆半径
+            const numPoints = 5;             // 五个顶点
+            
+            // 起始角度调整，使一个角指向正上方
+            const startAngle = -Math.PI / 2; // 从12点方向开始
+            
+            for (let i = 0; i <= numPoints * 2; i++) {
+                let angle, r;
+                
+                if (i % 2 === 0) {
+                    // 外顶点
+                    angle = startAngle + (i * Math.PI) / numPoints;
+                    r = outerRadius;
+                } else {
+                    // 内顶点
+                    angle = startAngle + (i * Math.PI) / numPoints;
+                    r = innerRadius;
+                }
+                
+                const x = x_center + r * Math.cos(angle);
+                const y = y_center + r * Math.sin(angle);
+                
+                if (i === 0) {
+                    starShape.moveTo(x, y);
+                } else {
+                    starShape.lineTo(x, y);
+                }
+            }
+            
+            return starShape;
+        }
+        
+        // 创建圣诞树场景
+        function createTreeScene(cfg) {
+            // 清除现有场景
+            scene.remove(treeGroup);
+            scene.remove(decorationsGroup);
+            scene.remove(ribbonGroup);
+            scene.remove(snowGroup);
+            if (star) scene.remove(star);
+            if (starLight) scene.remove(starLight);
+            
+            // 创建新组
+            treeGroup = new THREE.Group();
+            decorationsGroup = new THREE.Group();
+            ribbonGroup = new THREE.Group();
+            snowGroup = new THREE.Group();
+            
+            // 生成数据
+            const treeData = generateTreeData(cfg);
+            const snowData = generateSnow(cfg);
+            
+            // 创建树干
+            const trunkGeometry = new THREE.BufferGeometry();
+            const trunkPositions = [];
+            const trunkColors = [];
+            const trunkSizes = [];
+            
+            treeData.trunk.forEach(trunk => {
+                trunkPositions.push(trunk.x, trunk.y, trunk.z);
+                const color = hexToRgb(trunk.col);
+                trunkColors.push(color.r, color.g, color.b);
+                trunkSizes.push(trunk.size * 0.015);
+            });
+            
+            trunkGeometry.setAttribute('position', new THREE.Float32BufferAttribute(trunkPositions, 3));
+            trunkGeometry.setAttribute('color', new THREE.Float32BufferAttribute(trunkColors, 3));
+            trunkGeometry.setAttribute('size', new THREE.Float32BufferAttribute(trunkSizes, 1));
+            
+            const trunkMaterial = new THREE.PointsMaterial({
+                size: 0.05,
+                vertexColors: true,
+                sizeAttenuation: true
+            });
+            
+            const trunk = new THREE.Points(trunkGeometry, trunkMaterial);
+            treeGroup.add(trunk);
+            
+            // 创建树叶
+            const treeGeometry = new THREE.BufferGeometry();
+            const treePositions = [];
+            const treeColors = [];
+            const treeSizes = [];
+            
+            treeData.tree.forEach(leaf => {
+                treePositions.push(leaf.x, leaf.y, leaf.z);
+                const color = hexToRgb(leaf.col);
+                treeColors.push(color.r, color.g, color.b);
+                treeSizes.push(leaf.size * 0.01);
+            });
+            
+            treeGeometry.setAttribute('position', new THREE.Float32BufferAttribute(treePositions, 3));
+            treeGeometry.setAttribute('color', new THREE.Float32BufferAttribute(treeColors, 3));
+            treeGeometry.setAttribute('size', new THREE.Float32BufferAttribute(treeSizes, 1));
+            
+            const treeMaterial = new THREE.PointsMaterial({
+                size: 0.02,
+                vertexColors: true,
+                sizeAttenuation: true
+            });
+            
+            const tree = new THREE.Points(treeGeometry, treeMaterial);
+            treeGroup.add(tree);
+            
+            // 创建装饰物
+            const decorGeometry = new THREE.BufferGeometry();
+            const decorPositions = [];
+            const decorColors = [];
+            const decorSizes = [];
+            
+            treeData.decor.forEach(decor => {
+                decorPositions.push(decor.x, decor.y, decor.z);
+                const color = hexToRgb(decor.col);
+                decorColors.push(color.r, color.g, color.b);
+                decorSizes.push(decor.size * 0.015);
+            });
+            
+            decorGeometry.setAttribute('position', new THREE.Float32BufferAttribute(decorPositions, 3));
+            decorGeometry.setAttribute('color', new THREE.Float32BufferAttribute(decorColors, 3));
+            decorGeometry.setAttribute('size', new THREE.Float32BufferAttribute(decorSizes, 1));
+            
+            const decorMaterial = new THREE.PointsMaterial({
+                size: 0.05,
+                vertexColors: true,
+                sizeAttenuation: true
+            });
+            
+            const decorations = new THREE.Points(decorGeometry, decorMaterial);
+            decorationsGroup.add(decorations);
+            
+            // 创建丝带
+            if (cfg.ribbon && treeData.ribbon.length > 0) {
+                const ribbonGeometry = new THREE.BufferGeometry();
+                const ribbonPositions = [];
+                const ribbonColors = [];
+                
+                treeData.ribbon.forEach(point => {
+                    ribbonPositions.push(point.x, point.y, point.z);
+                    const color = hexToRgb(point.col);
+                    ribbonColors.push(color.r, color.g, color.b);
+                });
+                
+                ribbonGeometry.setAttribute('position', new THREE.Float32BufferAttribute(ribbonPositions, 3));
+                ribbonGeometry.setAttribute('color', new THREE.Float32BufferAttribute(ribbonColors, 3));
+                
+                const ribbonMaterial = new THREE.LineBasicMaterial({
+                    color: cfg.ribbon_col,
+                    linewidth: cfg.ribbon_width
+                });
+                
+                const ribbon = new THREE.Line(ribbonGeometry, ribbonMaterial);
+                ribbonGroup.add(ribbon);
+            }
+            
+            // 创建星星 - 使用优化的标准五角星
+            const starShape = getStarPolygon(0, 0, 0.04); // 稍微增大星星尺寸
+            const starGeometry = new THREE.ShapeGeometry(starShape);
+            const starMaterial = new THREE.MeshBasicMaterial({ 
+                color: cfg.star_col,
+                side: THREE.DoubleSide
+            });
+            star = new THREE.Mesh(starGeometry, starMaterial);
+            
+            // 关键修复：将星星精确镶嵌在圣诞树顶尖
+            // 圣诞树的高度范围是-0.5到0.5，树顶是y=0.5
+            // 星星的形状是从中心向外扩展，星星最下方的角在y = -starRadius
+            // 我们需要将星星的最下方角放在树顶y=0.5的位置
+            // 星星中心y = 树顶y + starRadius
+            const starRadius = 0.04;
+            const treeTopY = 0.5; // 圣诞树顶部y坐标
+            
+            // 计算星星中心位置：树顶y + 星星半径
+            // 这样星星的最下方角就在y=0.5，刚好接触树顶
+            const starCenterY = treeTopY + starRadius;
+            
+            // 为了让星星看起来是"镶"在树顶，而不是放在上面
+            // 我们可以稍微将星星向下移动一点，让星星的一部分嵌入树中
+            const starEmbeddedY = starCenterY - 0.02; // 向下移动0.02，让星星嵌入树顶
+            
+            star.position.set(0, starEmbeddedY, 0.01); // z轴稍微向前，避免被树叶遮挡
+            
+            // 创建容器组来固定星星
+            const starContainer = new THREE.Group();
+            starContainer.add(star);
+            treeGroup.add(starContainer);
+            
+            // 添加星星辉光
+            starLight = new THREE.PointLight(cfg.star_col, 1.5, 1.5);
+            starLight.position.copy(star.position);
+            starContainer.add(starLight);
+            
+            // 创建雪花
+            const snowGeometry = new THREE.BufferGeometry();
+            const snowPositions = [];
+            const snowColors = [];
+            const snowSizes = [];
+            
+            snowParticles = [];
+            snowData.forEach(flake => {
+                snowPositions.push(flake.x, flake.y, flake.z);
+                const color = hexToRgb(flake.col);
+                snowColors.push(color.r, color.g, color.b);
+                snowSizes.push(flake.size * 0.01);
+                snowParticles.push(flake);
+            });
+            
+            snowGeometry.setAttribute('position', new THREE.Float32BufferAttribute(snowPositions, 3));
+            snowGeometry.setAttribute('color', new THREE.Float32BufferAttribute(snowColors, 3));
+            snowGeometry.setAttribute('size', new THREE.Float32BufferAttribute(snowSizes, 1));
+            
+            const snowMaterial = new THREE.PointsMaterial({
+                size: 0.02,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8,
+                sizeAttenuation: true
+            });
+            
+            const snow = new THREE.Points(snowGeometry, snowMaterial);
+            snowGroup.add(snow);
+            
+            // 添加到场景
+            scene.add(treeGroup);
+            scene.add(decorationsGroup);
+            scene.add(ribbonGroup);
+            scene.add(snowGroup);
+            
+            // 更新背景色和文字颜色
+            document.body.style.backgroundColor = cfg.bg_col;
+            const textColor = cfg.text_col;
+            
+            // 更新标题颜色
+            const titleElement = document.getElementById('mainTitle');
+            const squareChar = document.getElementById('squareChar');
+            const infoText = document.getElementById('infoText');
+            const footerText = document.getElementById('footerText');
+            
+            if (titleElement) titleElement.style.color = textColor;
+            if (squareChar) squareChar.style.color = textColor;
+            if (infoText) infoText.style.color = textColor;
+            if (footerText) footerText.style.color = textColor;
+            
+            // 更新按钮颜色
+            document.querySelectorAll('.style-btn').forEach(btn => {
+                if (btn.classList.contains('active')) {
+                    btn.style.boxShadow = `0 0 12px ${cfg.text_col}`;
+                } else {
+                    btn.style.boxShadow = 'none';
+                }
+            });
+        }
+        
+        // 初始化场景
+        createTreeScene(styles[currentStyle]);
+        
+        // 动画循环
+        const clock = new THREE.Clock();
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const delta = clock.getDelta();
+            const elapsed = clock.getElapsedTime();
+            
+            // 更新帧ID
+            frameId = (frameId + 1) % n_frames;
+            
+            // 旋转树
+            treeGroup.rotation.y += rotationSpeed;
+            decorationsGroup.rotation.y += rotationSpeed;
+            ribbonGroup.rotation.y += rotationSpeed;
+            
+            // 闪烁星星 - 现在星星固定在树顶，只旋转和缩放
+            if (star) {
+                star.rotation.z += delta * starSpeed * 0.3;
+                const scale = 1 + Math.sin(elapsed * starSpeed * 0.8) * 0.08; // 减小缩放幅度
+                star.scale.set(scale, scale, scale);
+            }
+            
+            // 飘落雪花
+            if (snowGroup.children.length > 0) {
+                const snowMesh = snowGroup.children[0];
+                const positions = snowMesh.geometry.attributes.position.array;
+                
+                for (let i = 0; i < snowParticles.length; i++) {
+                    const idx = i * 3;
+                    snowParticles[i].y -= snowParticles[i].speed;
+                    if (snowParticles[i].y < -0.8) {
+                        snowParticles[i].y = 1.2;
+                    }
+                    positions[idx + 1] = snowParticles[i].y;
+                }
+                snowMesh.geometry.attributes.position.needsUpdate = true;
+            }
+            
+            // 更新控制器
+            controls.update();
+            
+            // 渲染
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        // 窗口大小调整
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // 风格切换
+        document.querySelectorAll('.style-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                // 更新活动按钮
+                document.querySelectorAll('.style-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // 切换风格
+                currentStyle = this.dataset.style;
+                createTreeScene(styles[currentStyle]);
+            });
+        });
+        
+        // 速度控制滑块
+        const rotationSpeedSlider = document.getElementById('rotationSpeedSlider');
+        const rotationSpeedValue = document.getElementById('rotationSpeedValue');
+        const snowSpeedSlider = document.getElementById('snowSpeedSlider');
+        const snowSpeedValue = document.getElementById('snowSpeedValue');
+        const starSpeedSlider = document.getElementById('starSpeedSlider');
+        const starSpeedValue = document.getElementById('starSpeedValue');
+        
+        // 更新树旋转速度
+        rotationSpeedSlider.addEventListener('input', function() {
+            rotationSpeed = this.value / 10000 + 0.001;
+            rotationSpeedValue.textContent = rotationSpeed.toFixed(4);
+        });
+        
+        // 更新雪花下落速度
+        snowSpeedSlider.addEventListener('input', function() {
+            snowSpeed = this.value / 50;
+            snowSpeedValue.textContent = snowSpeed.toFixed(3);
+            
+            // 重新生成雪花数据以应用新速度
+            createTreeScene(styles[currentStyle]);
+        });
+        
+        // 更新星星闪烁速度
+        starSpeedSlider.addEventListener('input', function() {
+            starSpeed = this.value / 50;
+            starSpeedValue.textContent = starSpeed.toFixed(2);
+        });
+        
+        // 初始化滑块值显示
+        rotationSpeedValue.textContent = rotationSpeed.toFixed(4);
+        snowSpeedValue.textContent = snowSpeed.toFixed(3);
+        starSpeedValue.textContent = starSpeed.toFixed(2);
+        
+        // 移动端控制面板下拉功能
+        const mobileToggle = document.getElementById('mobileToggle');
+        const controlsContainer = document.getElementById('controlsContainer');
+        const toggleArrow = document.getElementById('toggleArrow');
+        
+        let isControlsVisible = false;
+        let startY = 0;
+        let isDragging = false;
+        
+        // 点击切换控制面板
+        mobileToggle.addEventListener('click', function() {
+            isControlsVisible = !isControlsVisible;
+            controlsContainer.classList.toggle('active', isControlsVisible);
+            toggleArrow.classList.toggle('up', isControlsVisible);
+        });
+        
+        // 触摸滑动控制
+        mobileToggle.addEventListener('touchstart', function(e) {
+            startY = e.touches[0].clientY;
+            isDragging = true;
+        });
+        
+        mobileToggle.addEventListener('touchmove', function(e) {
+            if (!isDragging) return;
+            
+            const currentY = e.touches[0].clientY;
+            const deltaY = startY - currentY;
+            
+            // 向下滑动超过30px时展开面板
+            if (deltaY < -30 && !isControlsVisible) {
+                isControlsVisible = true;
+                controlsContainer.classList.add('active');
+                toggleArrow.classList.add('up');
+                isDragging = false;
+            }
+            // 向上滑动超过30px时收起面板
+            else if (deltaY > 30 && isControlsVisible) {
+                isControlsVisible = false;
+                controlsContainer.classList.remove('active');
+                toggleArrow.classList.remove('up');
+                isDragging = false;
+            }
+        });
+        
+        mobileToggle.addEventListener('touchend', function() {
+            isDragging = false;
+        });
+        
+        // 点击控制面板外部区域收起面板
+        document.addEventListener('click', function(e) {
+            if (isControlsVisible && 
+                !controlsContainer.contains(e.target) && 
+                !mobileToggle.contains(e.target) &&
+                window.innerWidth <= 1024) {
+                isControlsVisible = false;
+                controlsContainer.classList.remove('active');
+                toggleArrow.classList.remove('up');
+            }
+        });
+        
+        // 阻止控制面板内部点击事件冒泡
+        controlsContainer.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    </script>
+</body>
+</html>
